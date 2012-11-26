@@ -9,7 +9,9 @@ gem 'faker'
 gem "friendly_id", "~> 4.0.1"
 gem "uuidtools", "~> 2.1.3"
 # gem 'newrelic_rpm'
-
+gem "rmagick"
+gem "fog"
+gem 'carrierwave'
 
 # Gems used only for assets and not required
 # in production environments by default.

@@ -14,6 +14,13 @@ FactoryGirl.define do
     end   
   end
 
+  factory :product do
+    sequence(:title) { |n| "Product #{n}" }
+    sequence(:description) { |n| "Product description #{n}" }
+    sequence(:price) { |n| n }
+    seller
+  end
+
   #how do to auto association?
 
 end

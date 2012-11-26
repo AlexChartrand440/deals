@@ -32,4 +32,6 @@ class User < ActiveRecord::Base
 
   has_many :addresses
 
+  has_many :products, foreign_key: 'seller_id' 
+
 end
