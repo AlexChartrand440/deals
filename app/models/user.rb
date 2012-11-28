@@ -19,6 +19,7 @@
 #  seller                 :boolean          default(FALSE)
 #  first_name             :string(255)
 #  last_name              :string(255)
+#  brand                  :string(255)
 #
 
 class User < ActiveRecord::Base
@@ -28,10 +29,11 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
 
-  attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :seller
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :seller, :brand
 
   has_many :addresses
-
   has_many :products, foreign_key: 'seller_id' 
+
+  validates :brand, presence: true, uniqueness: { case_sensitive: false }, if: :seller?
 
 end

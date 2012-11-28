@@ -19,6 +19,7 @@
 #  seller                 :boolean          default(FALSE)
 #  first_name             :string(255)
 #  last_name              :string(255)
+#  brand                  :string(255)
 #
 
 require 'spec_helper'
@@ -26,6 +27,7 @@ require 'spec_helper'
 describe User do
   before do
     @user = User.new(first_name: "Josh", last_name: "Teng", email: "user@example.com", password: "foobar", password_confirmation: "foobar")
+    @seller = User.new(first_name: "Josh", last_name: "Teng", email: "seller@example.com", password: "foobar", password_confirmation: "foobar", seller:true, brand: "ABC Store")#just to test attr_accessible whitelist
   end
 
   subject { @user }
@@ -37,11 +39,16 @@ describe User do
   it { should respond_to(:password_confirmation) }
   it { should respond_to(:remember_me) }
   it { should respond_to(:addresses) }
+  it { should respond_to(:brand) }
+  it { should respond_to(:seller) }
+  it { should respond_to(:admin) }
   it { should be_valid }
 
   it { should_not be_seller }
   it { should_not be_admin }
 
+  it { @seller.should be_seller }#just to test attr_accessible whitelist
+  it { @seller.should be_valid }#just to test attr_accessible whitelist
 
   describe "accessible attributes" do
     it "should not allow access to admin" do
@@ -113,11 +120,27 @@ describe User do
 
     describe "making a user a seller" do
       before do 
+        @user.brand = "Atom Retail"
         @user.seller = true
       end
 
       it { should be_valid }
       it { should be_seller }
+
+      describe "without a brand name" do
+        before { @user.brand = "" }
+        it { should_not be_valid }
+      end
+
+      describe "without a unique brand name regardless of casing" do
+        before do
+          @seller.save
+          @dup_seller = @seller.dup
+          @dup_seller.email = "unique@example.com"
+          @dup_seller.brand = @seller.brand.upcase
+        end
+        it { @dup_seller.should_not be_valid }
+      end
     end
   end
 end

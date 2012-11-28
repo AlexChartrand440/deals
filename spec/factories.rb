@@ -6,12 +6,17 @@ FactoryGirl.define do
     password_confirmation "foobar"
 
     factory :seller do
+      sequence(:brand) { |n| "brand #{n}"}
       seller true
-    end  
+    end
 
     factory :admin do
       admin true
     end   
+  end
+
+  factory :category do
+    sequence(:name) { |n| "Category #{n}" }
   end
 
   factory :product do
@@ -20,7 +25,4 @@ FactoryGirl.define do
     sequence(:price) { |n| n }
     seller
   end
-
-  #how do to auto association?
-
 end

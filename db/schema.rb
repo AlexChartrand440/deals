@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121126063514) do
+ActiveRecord::Schema.define(:version => 20121128085258) do
 
   create_table "addresses", :force => true do |t|
     t.integer  "user_id"
@@ -28,6 +28,32 @@ ActiveRecord::Schema.define(:version => 20121126063514) do
   add_index "addresses", ["city"], :name => "index_addresses_on_city"
   add_index "addresses", ["country"], :name => "index_addresses_on_country"
   add_index "addresses", ["user_id"], :name => "index_addresses_on_user_id"
+
+  create_table "categories", :force => true do |t|
+    t.string   "name"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "categories", ["name"], :name => "index_categories_on_name", :unique => true
+
+  create_table "categorizations", :force => true do |t|
+    t.integer  "product_id"
+    t.integer  "category_id"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+  end
+
+  add_index "categorizations", ["product_id", "category_id"], :name => "index_categorizations_on_product_id_and_category_id", :unique => true
+
+  create_table "product_images", :force => true do |t|
+    t.integer  "product_id"
+    t.string   "image"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
 
   create_table "products", :force => true do |t|
     t.integer  "seller_id"
@@ -57,8 +83,10 @@ ActiveRecord::Schema.define(:version => 20121126063514) do
     t.boolean  "seller",                 :default => false
     t.string   "first_name"
     t.string   "last_name"
+    t.string   "brand"
   end
 
+  add_index "users", ["brand"], :name => "index_users_on_brand", :unique => true
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
   add_index "users", ["seller"], :name => "index_users_on_seller"

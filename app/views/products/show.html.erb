@@ -1,0 +1,10 @@
+<% provide(:title, "#{@item.title}") %>
+
+<h2><%= @item.title %></h2>
+
+
+<% if @category.nil? %>
+  <%= link_to "back to #{@item.seller.brand}", brand_items_path(@item.seller_id) %>
+<% else %>
+  <%= link_to "back to #{@category.name}", category_items_path(@category) %>
+<% end %>

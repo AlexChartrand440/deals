@@ -5,6 +5,7 @@ gem 'devise'
 gem 'thin'
 gem 'json'
 gem 'jquery-rails'
+gem 'populator'
 gem 'faker'
 gem "friendly_id", "~> 4.0.1"
 gem "uuidtools", "~> 2.1.3"
