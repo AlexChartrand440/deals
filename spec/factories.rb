@@ -21,8 +21,10 @@ FactoryGirl.define do
 
   factory :product do
     sequence(:title) { |n| "Product #{n}" }
-    sequence(:description) { |n| "Product description #{n}" }
     sequence(:price) { |n| n }
+    sequence(:discounted_price) { |n| n - 1 }
+    discount_start_date Date.tomorrow
+    discount_end_date Date.tomorrow + 1
     seller
   end
 end

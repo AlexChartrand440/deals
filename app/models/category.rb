@@ -6,10 +6,14 @@
 #  name       :string(255)
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
+#  slug       :string(255)
 #
 
 class Category < ActiveRecord::Base
   attr_accessible :name
+
+  extend FriendlyId
+  friendly_id :name, use: :slugged
 
   has_many :categorizations, dependent: :destroy
   has_many :products, through: :categorizations

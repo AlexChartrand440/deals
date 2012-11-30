@@ -5,17 +5,22 @@ Deals::Application.routes.draw do
     resources :items, controller: "products", only: [:new, :edit, :create, :update, :destroy]
   end
 
-  # /brands/:id(slug)/products
-  # /brands/:id(slug)/products/:id(uuid)
+  # /brands/:id(slug)/items
+  # /brands/:id(slug)/items/:id(uuid)
   resources :brands, controller: "users", only: [] do
-    resources :items, controller: "products", only: [:index, :show]
+    namespace :sales do
+      resources :items, controller: "products", only: [:index, :show]
+    end
   end
 
-  # /categories/:id(slug)/products
+  # /categories/:id(slug)/items
   resources :categories, only: [] do
-    resources :items, controller: "products", only: [:index]
+    namespace :sales do
+      resources :items, controller: "products", only: [:index]
+    end
   end
 
+  root to: 'static_pages#home'
 
 
 

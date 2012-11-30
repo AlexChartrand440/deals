@@ -20,6 +20,7 @@
 #  first_name             :string(255)
 #  last_name              :string(255)
 #  brand                  :string(255)
+#  slug                   :string(255)
 #
 
 require 'spec_helper'
@@ -59,6 +60,16 @@ describe User do
   end
 
   describe "basic validations" do
+    describe "with a brand name" do
+      before { @user.brand = "Hello" }
+      it { should_not be_valid }#only sellers can hv brand names
+    end
+
+    describe "with a slug" do
+      before { @user.slug = "Hello" }
+      it { should_not be_valid }#only sellers can hv slugs
+    end
+
     describe "without an email" do
       before { @user.email = "" }
       it { should_not be_valid }
@@ -120,8 +131,8 @@ describe User do
 
     describe "making a user a seller" do
       before do 
-        @user.brand = "Atom Retail"
         @user.seller = true
+        @user.brand = "Atom Retail"
       end
 
       it { should be_valid }
@@ -130,6 +141,11 @@ describe User do
       describe "without a brand name" do
         before { @user.brand = "" }
         it { should_not be_valid }
+      end
+
+      describe "should create a slug automatically" do
+        before { @user.save }#it creates slug on validation
+        its(:slug) { should_not be_blank }
       end
 
       describe "without a unique brand name regardless of casing" do
@@ -143,4 +159,30 @@ describe User do
       end
     end
   end
+
+  describe "product associations" do
+    before { @seller.save }
+
+    let!(:older_product) do
+      FactoryGirl.create(:product, seller: @seller, created_at: 1.day.ago)
+    end
+
+    let!(:newer_product) do
+      FactoryGirl.create(:product, seller: @seller, created_at: 1.hour.ago)
+    end
+
+    it "should have the right products in the right order" do #should this test go into product spec?
+      @seller.products.should == [newer_product, older_product]
+    end
+
+    it "should destroy associated products" do
+      products = @seller.products
+      @seller.destroy
+      products.each do |product|
+        Product.find_by_id(product.id).should be_nil
+      end
+    end
+  end
+
+
 end

@@ -1,5 +1,0 @@
-<% provide(:title, "#{@title}") %>
-
-<% @items.each do |i| %>
-  <h3><%= link_to i.title, brand_item_path(i.seller_id, i, request.params) %></h3><br />
-<% end %>

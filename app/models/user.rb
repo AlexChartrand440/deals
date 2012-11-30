@@ -20,6 +20,7 @@
 #  first_name             :string(255)
 #  last_name              :string(255)
 #  brand                  :string(255)
+#  slug                   :string(255)
 #
 
 class User < ActiveRecord::Base
@@ -31,9 +32,22 @@ class User < ActiveRecord::Base
 
   attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :seller, :brand
 
+  extend FriendlyId
+  friendly_id :brand, use: :slugged #should allow history?
+
+  def should_generate_new_friendly_id?
+    seller? #slug will not change if brand name doesn't change
+  end
+
   has_many :addresses
-  has_many :products, foreign_key: 'seller_id' 
+  has_many :products, foreign_key: 'seller_id', dependent: :destroy
+#   has_many :latest_orders, :class_name => "Order", :conditions => proc { ["orders.created_at > ?", 10.hours.ago] }
+
 
   validates :brand, presence: true, uniqueness: { case_sensitive: false }, if: :seller?
+  # validates :slug, presence: true, uniqueness: { case_sensitive: false }, if: :seller?
+
+  validates :brand, :length => {:is => 0 }, if: "seller == false"
+  validates :slug, :length => {:is => 0 }, if: "seller == false"
 
 end

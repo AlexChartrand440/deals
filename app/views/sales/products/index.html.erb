@@ -1,0 +1,5 @@
+<% provide(:title, "#{@title}") %>
+
+<% @items.each do |i| %>
+  <li><%= link_to i.title, brand_sales_item_path(i.seller, i, request.params) %> | <%= i.categories.map { |c| c.name } %> | <%= i.seller.brand %> | <%= i.created_at.strftime('%d - %h - %y') %> | <%= number_to_currency(i.price, :unit => "RM ") %></li><br />
+<% end %>
