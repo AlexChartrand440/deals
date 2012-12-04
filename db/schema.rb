@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121130075237) do
+ActiveRecord::Schema.define(:version => 20121204140511) do
 
   create_table "addresses", :force => true do |t|
     t.integer  "user_id"
@@ -57,17 +57,28 @@ ActiveRecord::Schema.define(:version => 20121130075237) do
 
   add_index "product_descriptions", ["product_id"], :name => "index_product_descriptions_on_product_id", :unique => true
 
+  create_table "product_image_attributes", :force => true do |t|
+    t.integer  "product_id"
+    t.integer  "product_image_id"
+    t.integer  "sort_order"
+    t.boolean  "default",          :default => false
+    t.datetime "created_at",                          :null => false
+    t.datetime "updated_at",                          :null => false
+  end
+
+  add_index "product_image_attributes", ["product_id", "default"], :name => "index_on_product_id_and_default"
+  add_index "product_image_attributes", ["product_id", "product_image_id"], :name => "index_on_product_id_and_product_image_id", :unique => true
+  add_index "product_image_attributes", ["product_id", "sort_order"], :name => "index_on_product_id_and_sort_order", :unique => true
+  add_index "product_image_attributes", ["product_id"], :name => "index_product_image_attributes_on_product_id"
+  add_index "product_image_attributes", ["product_image_id"], :name => "index_product_image_attributes_on_product_image_id"
+
   create_table "product_images", :force => true do |t|
     t.integer  "product_id"
     t.string   "image"
-    t.datetime "created_at",                    :null => false
-    t.datetime "updated_at",                    :null => false
-    t.integer  "sort_order"
-    t.boolean  "default",    :default => false
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
-  add_index "product_images", ["product_id", "default"], :name => "index_product_images_on_product_id_and_default"
-  add_index "product_images", ["product_id", "sort_order"], :name => "index_product_images_on_product_id_and_sort_order", :unique => true
   add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
 
   create_table "products", :force => true do |t|

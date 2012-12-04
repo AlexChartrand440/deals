@@ -19,6 +19,7 @@ require 'spec_helper'
 describe Address do
   let(:user) { FactoryGirl.create(:user) }
   before { @address = user.addresses.build(address_1: '277 Cherry St.', city: 'Atlanta', country: 'U.S.A.', post_code: '232323', state: 'GA') }
+  
   subject { @address }
 
   it { should respond_to(:address_1) }

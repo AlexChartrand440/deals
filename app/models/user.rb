@@ -39,7 +39,7 @@ class User < ActiveRecord::Base
     seller? #slug will not change if brand name doesn't change
   end
 
-  has_many :addresses
+  has_many :addresses, dependent: :destroy #test this!
   has_many :products, foreign_key: 'seller_id', dependent: :destroy
 #   has_many :latest_orders, :class_name => "Order", :conditions => proc { ["orders.created_at > ?", 10.hours.ago] }
 

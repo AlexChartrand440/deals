@@ -9,7 +9,7 @@
 #  created_at                :datetime         not null
 #  updated_at                :datetime         not null
 #  slug                      :string(255)
-#  status                    :boolean          default(FALSE)
+#  status                    :boolean          default(TRUE)
 #  quantity                  :integer          default(0)
 #  discounted_price          :decimal(8, 2)
 #  discounted_percentage_off :integer
@@ -24,7 +24,7 @@ require 'spec_helper'
 describe Product do
   let(:seller){ FactoryGirl.create(:seller) }
   before do
-    @product_attributes = { title: "fwefwe", price: 25.45, discounted_price: 25, discount_start_date: Date.tomorrow, discount_end_date: Date.tomorrow + 1  }
+    @product_attributes = { title: "fwefwe", price: 25.45, discounted_price: 25, discount_start_date: DateTime.now.tomorrow.to_date, discount_end_date: DateTime.now.tomorrow.to_date + 1  }
     @product = seller.products.build(@product_attributes)
   end
   subject { @product }
@@ -42,7 +42,9 @@ describe Product do
   it { should respond_to(:description) }
   it { should respond_to(:seller_id) }
   it { should respond_to(:seller) }
+  it { should respond_to(:default_image) }
   it { should respond_to(:images) }
+  it { should respond_to(:product_image_attributes) }
   it { should respond_to(:categories) }
   it { should respond_to(:categorizations) }
 
@@ -169,7 +171,17 @@ describe Product do
       @product.categorizations.create(category_id: category.id)
       @product.categorizations.create(category_id: category2.id)
     end
+    
     its(:categories){ should include(category, category2) }
+    its(:categorizations){ should_not be_nil }
+
+    it "should destroy associated categorizations" do
+      categorizations = @product.categorizations
+      @product.destroy
+      categorizations.each do |c|
+        Categorization.find_by_id(c.id).should be_nil
+      end
+    end
   end
 
   describe "description association" do
@@ -186,5 +198,91 @@ describe Product do
     end
   end
 
+  describe "ProductImage association" do
+    #must have images on product creation? The nested form will take care of this I believe
+    before do
+      @product.save!
+      @product_image = @product.images.new
+      @product_image.image = File.open('app/assets/images/rails.png')
+      @product_image.save!
+    end
 
+    #how to test the url method?
+    its(:images){ should include(@product_image) }
+
+    it "should destroy associated images" do
+      images = @product.images
+      @product.destroy
+      images.each do |i|
+        ProductImage.find_by_id(i.id).should be_nil
+      end
+    end
+
+    context "default image functionality" do
+      describe "after making an image default" do
+        it "should be found through default_image" do
+          @product_image.attribute.update_attributes!(default: true)
+          @product.default_image.should eql(@product_image)
+        end
+      end
+
+      describe "without setting a default image" do
+        before do
+          @another_product_image = @product.images.new
+          @another_product_image.image = File.open('app/assets/images/rails.png')
+          @another_product_image.save!
+        end
+
+        describe "and sort_order" do
+          it "should return the one created first (created_at)" do
+            @product.default_image.should eql(@product_image)
+          end
+        end
+
+        describe "when sort_order is set" do
+          it "should return the first one in the sort_order" do
+            @another_product_image.attribute.update_attributes!(sort_order: 1)
+            @product_image.attribute.update_attributes!(sort_order: 2)
+            @product.default_image.should eql(@another_product_image)
+          end
+        end
+      end
+    end
+
+    context "sorted images functionality" do
+      let(:newer_product_image){ FactoryGirl.create(:product_image, product_id: @product) }
+
+      before do
+        now = DateTime.now
+        newer_product_image.attribute.update_column(:created_at, now)
+        @product_image.attribute.update_column(:created_at, now -1)
+      end
+
+      it "should return images in chronological order on created_at" do
+        @product.sorted_images.should == [@product_image, newer_product_image]
+      end
+
+      describe "when sort_order is set" do
+        before do
+          newer_product_image.attribute.update_attributes!(sort_order: 1)
+          @product_image.attribute.update_attributes!(sort_order: 2)
+        end
+
+        it "should return images in chronological order based on sort_order" do
+          @product.sorted_images.should == [newer_product_image, @product_image]
+        end
+      end
+
+      describe "when some sort order are set and some are not" do
+        before do
+          newer_product_image.attribute.update_attributes!(sort_order: 1)
+        end
+
+        it "should fall back to sorting images by created_at" do
+          @product.sorted_images.should == [@product_image, newer_product_image]
+        end
+      end
+    end
+
+  end
 end

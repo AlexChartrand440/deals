@@ -184,5 +184,26 @@ describe User do
     end
   end
 
+  describe "address association" do
+    before { @user.save }
+
+    let(:address){ FactoryGirl.create(:address, user: @user) }
+
+    it "should have address" do
+      @user.addresses.should_not be_nil
+    end
+
+    it "should include address created" do
+      @user.addresses.should include(address)
+    end
+
+    it "should destroy associated address" do
+      addresses = @user.addresses
+      @user.destroy
+      addresses.each do |address|
+        Address.find_by_id(address.id).should be_nil
+      end
+    end
+  end
 
 end

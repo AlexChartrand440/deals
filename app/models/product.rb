@@ -9,7 +9,7 @@
 #  created_at                :datetime         not null
 #  updated_at                :datetime         not null
 #  slug                      :string(255)
-#  status                    :boolean          default(FALSE)
+#  status                    :boolean          default(TRUE)
 #  quantity                  :integer          default(0)
 #  discounted_price          :decimal(8, 2)
 #  discounted_percentage_off :integer
@@ -36,7 +36,9 @@ class Product < ActiveRecord::Base
 
   default_scope order: 'products.created_at DESC'
 
-  has_many :images, class_name: "ProductImage", dependent: :destroy #check if when I delete the product, does it delete the image both from database and also s3
+  has_many :images, class_name: "ProductImage", dependent: :destroy, include: :attribute #check if when I delete the product, does it delete the image both from database and also s3
+  has_many :product_image_attributes, include: :image
+
   has_many :categorizations, dependent: :destroy
   has_many :categories, through: :categorizations
   has_one :description, class_name: "ProductDescription", dependent: :destroy
@@ -57,6 +59,21 @@ class Product < ActiveRecord::Base
 
   validates :discounted_price, presence: true
   validate :discounted_price_should_be_less_than_regular_price, if: :discounted_price_and_price_present
+
+  #use this for product index pages
+  def default_image
+    default_image_attribute = self.product_image_attributes.where(default: true)
+    unless default_image_attribute.empty?
+      default_image_attribute.first.image
+    else
+      self.product_image_attributes.order('sort_order ASC, created_at ASC').first.image
+    end
+  end
+
+  #use this for product show pages
+  def sorted_images
+    product_image_attributes.order('sort_order ASC, created_at ASC').map { |a| a.image }
+  end
 
   private
 
@@ -85,5 +102,11 @@ class Product < ActiveRecord::Base
       errors.add(:seller, "is not an approved seller")
     end
   end
+
+
+  #to create images, product.images.new (this auto creates corresponding attribute)
+  #to edit attribute, product_image.attribute.update_attributes()
+  #to retrieve image for index page product.default_image
+  #to retrueve images for show page product.sorted_images
 
 end

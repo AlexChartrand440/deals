@@ -37,10 +37,17 @@ namespace :db do
       Product.populate 10..50 do |product|
         product.seller_id = User.where(seller: true).map { |u| u.id }
         product.title = Populator.words(1..5).titleize
-        product.description = Populator.sentences(2..10)
-        product.price = [4.99, 19.95, 100]
+        product.price = [444.99, 199.95, 100, 600, 132.5, 154.90, 170.80, 200.60]
+        product.discounted_price = [19.99, 50, 30.90, 99, 1, 28]
+        product.discount_start_date = Date.today - 10..Date.today + 100
+        product.discount_end_date = product.discount_start_date + 2..product.discount_start_date + 60
         product.created_at = 2.years.ago..Time.now
+        product.updated_at = 2.years.ago..Time.now
         product.slug = Base64.urlsafe_encode64(UUIDTools::UUID.random_create).downcase[0..5]
+        ProductDescription.populate 1 do |d|
+          d.text = Populator.sentences(2..10)
+          d.product_id = product.id
+        end
         Categorization.populate 1 do |c|
           c.category_id = category.id
           c.product_id = product.id
